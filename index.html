@@ -181,20 +181,20 @@
 	<button id="info-button" onclick="myInfo()">Information</button>
 	<div id='footer'>
 		<div><img src="https://uky-gis.github.io/graphics/logo-color-400px.png" class="footer-img">
-			<h1>Average Rent in US Counties</h1>
+			<h1>Average Rent in US deaths</h1>
 			Data obtained through the American Fact Finder (<a
 				href="http://factfinder.census.gov/">factfinder.census.gov</a>);
 			2010 Census, SF1. Map created by <a href="https://github.com/Marcus3663">Marcus3663</a>, Spring 2022.
 		</div>
 	</div>
-	
+
 	<footer>
 
 		<p>Map authored by Marcus Rodriguez</p>
 
 	</footer>
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"
-		integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.7.2/proj4.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.min.js"></script>
 	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 		integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
 		crossorigin=""></script>
@@ -202,30 +202,198 @@
 	<script src="https://unpkg.com/simple-statistics@7.6.0/dist/simple-statistics.min.js"></script>
 
 	<script>
-		// map options
-		var options = {
-			center: [38, -95],
-			zoom: 4
+		// Build new CRS with Proj4Leaflet https://github.com/kartena/Proj4Leaflet https://epsg.io
+		var crs = new L.Proj.CRS('EPSG:102008',
+			`+proj=aea +lat_1=20 +lat_2=60 
+             +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 
+             +datum=NAD83 +units=m +no_defs`, {
+			// Set minimum zoom level (array item 0) and zoom steps as you zoom in
+			resolutions: [16385, 8192, 6000, 4096, 2048, 1024, 512, 256, 128],
+			origin: [0, 0]
+		})
+
+		const options = {
+			// Set the CRS to use
+			crs: crs,
+			center: [38, -98],
+			zoom: 2,
+			zoomSnap: 1,
+			zoomControl: false,
 		}
 
-		// create a Leaflet map in our division container with id of 'map'
-		var map = L.map('map', options);
+		const map = L.map('map', options);
 
-		// Leaflet providers base map URL
-		var basemap_source =
-			'https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/dark_all/{z}/{x}/{y}.png'
+		map.addControl(L.control.zoom({
+			position: 'topright'
+		}));
 
-		// Leaflet providers attributes
-		var basemap_options = {
-			attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
-			subdomains: 'abcd',
-			maxZoom: 19
+		// Set data location and properties
+		const geojsons = {
+			deaths: {
+				data: '/data/drunk_deaths.geojson',
+				props: {
+					color: '#444',
+					mouseover: 'orange',
+					weight: 0.7,
+					fillOpacity: 1,
+					attr: 'Total_Killed',
+					name: 'State',
+					popup: function (name, attr) {
+						return `<h2>${name}</h2>
+                                Drivers Killed: $${attr}`
+					}
+				}
+			},
+			states: {
+				data: '/data/us_states_20m.geojson',
+				props: {
+					color: '#222222',
+					weight: 2,
+					fillOpacity: 0,
+					interactive: false
+				}
+			},
+		}
+
+		function getColor(value, breaks) {
+			const colors = ['#f0f7ff', '#bdc5e3', '#8b96c7', '#5669ab', '#00408f']
+			if (value <= breaks[0][1]) {
+				return colors[0];
+			} else if (value <= breaks[1][1]) {
+				return colors[1];
+			} else if (value <= breaks[2][1]) {
+				return colors[2];
+			} else if (value <= breaks[3][1]) {
+				return colors[3];
+			} else if (value <= breaks[4][1]) {
+				return colors[4];
+			}
 		};
 
-		// request some basemap tiles and add to the map
-		var tiles = L.tileLayer(basemap_source, basemap_options).addTo(map);
+		// Fetch a data file
+		fetch(geojsons.deaths.data)
+			.then(function (response) {
+				// When and if the data is ready, return it as JSON object
+				return response.json()
+			})
+			.then(function (data) {
+				// Create shorthand for the county layer properties
+				const props = geojsons.deaths.props
+				// Create Leaflet GeoJSON layer with the data
+				const dataLayer = L.geoJson(data, {
+					style: function (feature) {
+						return {
+							color: props.color,
+							weight: props.weight,
+							fillOpacity: props.fillOpacity,
+						};
+					},
+					filter: function (feature) {
+						if (feature.properties[props.attr] !== null) {
+							return feature;
+						}
+					},
+					onEachFeature: function (feature, layer) {
+						var popup = props.popup(feature.properties[props.name],
+							feature.properties[props.attr]);
+						layer.bindTooltip(popup, {
+							className: 'tooltip'
+						});
+						layer.on('mouseover', function (e) {
+							layer.setStyle({
+								weight: props.weight + 2,
+								color: props.mouseover,
+							});
+							layer.bringToFront();
+						});
+						layer.on('mouseout', function (e) {
+							layer.setStyle({
+								weight: props.weight,
+								color: props.color,
+							});
+							layer.bringToBack();
+						});
+					},
+				}).addTo(map);
 
+				drawMap(dataLayer);
 
+				// Return another fetch request for the state data
+				return fetch(geojsons.states.data)
+			})
+			// Continue with the promise chain
+			.then(function (response) {
+				return response.json()
+			})
+			.then(function (data) {
+				const props = geojsons.states.props
+				const dataLayer = L.geoJson(data, {
+					style: function (feature) {
+						return {
+							color: props.color,
+							weight: props.weight,
+							fillOpacity: props.fillOpacity,
+							interactive: props.interactive
+						};
+					},
+				}).addTo(map);
+			})
+			// Catch any errors fetching the data
+			.catch(function (err) {
+				console.warn('Something went wrong.', err);
+			});
+
+		function drawMap(dataLayer) {
+			const attr = geojsons.deaths.props.attr;
+			const breaks = getClassBreaks(dataLayer);
+			dataLayer.eachLayer(function (layer) {
+				const props = layer.feature.properties;
+				if (props[attr] != null) {
+					layer.setStyle({
+						fillColor: getColor(props[attr], breaks)
+					})
+				}
+			});
+			drawLegend(breaks);
+		};
+
+		function getClassBreaks(dataLayer) {
+			const attr = geojsons.deaths.props.attr;
+			const values = [];
+			dataLayer.eachLayer(function (layer) {
+				const props = layer.feature.properties
+				if (props[attr] != null) {
+					let value = Number(props[attr]);
+					values.push(value);
+				}
+			});
+			const clusters = ss.ckmeans(values, 5);
+			const breaks = clusters.map(function (cluster) {
+				return [cluster[0], cluster.pop()];
+			});
+			return breaks;
+		};
+
+		function drawLegend(breaks) {
+
+			const legend = L.control({
+				position: 'bottomleft'
+			});
+
+			legend.onAdd = function () {
+				const div = L.DomUtil.create('div', 'legend');
+				div.innerHTML = "<h3>People Killed<br></h3><br>";
+				for (let i = 0; i < breaks.length; i++) {
+					let color = getColor(breaks[i][0], breaks);
+					div.innerHTML +=
+						`<span style="background: ${color}"></span>
+                        <label>$${(breaks[i][0]).toLocaleString()}&mdash;
+                        $${(breaks[i][1]).toLocaleString()}</label>`
+				}
+				return div;
+			};
+			legend.addTo(map);
+		};
 	</script>
 </body>
 
