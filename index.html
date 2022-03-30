@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset=utf-8 />
+	<title>US Average Rent</title>
+	<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+		integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+		crossorigin="" />
+	<link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+	<style>
+		/* 
+			UKy Colors: 
+            #c7c9c8 light gray 
+            #63666a dark gray
+            #15397f dark blue
+            #009bda light blue
+            #0033a0 official blue
+        */
+		body {
+			margin: 0;
+			padding: 0;
+			background: #222;
+			/* dark */
+			font-family: Lato, sans-serif;
+			font-size: 100%;
+			color: #ddd;
+			/* light */
+		}
+
+		header {
+			width: 80%;
+			margin: 10px auto 10px auto;
+		}
+
+		h1 {
+			display: inline-block;
+			margin-right: 20px;
+			color: #0ee72b;
+		}
+
+		h2 {
+			display: inline-block;
+			color: #001323;
+		}
+
+		a {
+			color: #004A8B;
+		}
+
+		a:hover {
+			color: rgb(67, 69, 71);
+			text-decoration: none;
+		}
+
+
+		#map {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			width: 100%;
+			background: rgba(63, 63, 63, 0.9);
+			/* with transparency */
+			border: 2px solid #dddedf;
+		}
+
+		.legend {
+			padding: 6px 8px;
+			font-size: 1em;
+			/* Use transparency to blend elements. */
+			border: 2px solid rgba(244, 244, 244, 0.2);
+			background: rgba(100, 100, 100, 0.9);
+			color: rgba(244, 244, 244, 0.8);
+			border-radius: 5px;
+		}
+
+		.legend h3 {
+			font-size: 1.1em;
+			font-weight: bolder;
+			color: #ddd;
+			/* Light */
+			margin: 0 0 10px 0;
+		}
+
+		.legend span {
+			width: 20px;
+			height: 20px;
+			float: left;
+			margin: 0 10px 4px 0;
+		}
+
+		.legend label {
+			font-size: 1.1em;
+		}
+
+		.legend label:after {
+			content: '';
+			display: block;
+			clear: both;
+		}
+
+		.leaflet-bar a {
+			/* Override the default style for Leaflet's zoom  */
+			background: rgba(100, 100, 100, 0.9);
+			color: rgba(244, 244, 244, 0.8);
+		}
+
+		footer {
+			padding: 6px 10%;
+			width: 80%;
+		}
+
+		p {
+			font-size: 1em;
+			color: #001323;
+		}
+
+		#info-button {
+			padding: 8px 5px;
+			font-size: 0.9em;
+			font-weight: bolder;
+			/* Style matches Leaflet controls */
+			border: 2px solid rgba(244, 244, 244, 0.2);
+			background: rgba(100, 100, 100, 0.9);
+			color: rgba(244, 244, 244, 0.8);
+			border-radius: 5px;
+			/* Position is fixed next to the zoom bar */
+			position: fixed;
+			top: 11px;
+			right: 52px;
+			/* Draw it on top of all elements */
+			z-index: 9999;
+			/* Cursor change on hover -- doesn't work on touch screensn */
+			cursor: pointer;
+		}
+
+		#footer {
+			width: 100%;
+			background: rgba(244, 244, 244, 0.8);
+			color: rgba(20, 20, 20, 0.8);
+			box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+			height: 0px;
+			padding: 0px;
+			/* display below the button to allow clicking if overlay covers screen */
+			z-index: 9000;
+			position: absolute;
+			/* 
+    Hide the footer be default. This should not contain too much information. Like to a new page for extended content.
+    */
+			bottom: -10px;
+			/* If too much is included, enable scroll */
+			overflow: scroll;
+		}
+
+		#footer div {
+			padding: 10px;
+		}
+
+		#footer h1 {
+			font-size: 1.3em;
+			margin: 0 0 5px 0;
+		}
+
+		.footer-img {
+			float: right;
+			height: 10vh;
+			margin: 10px;
+		}
+	</style>
+</head>
+
+<body>
+
+	<header>
+		<h1>People Killed by Dunk Driving</h1>
+	</header>
+
+	<div id='map'></div>
+	<button id="info-button" onclick="myInfo()">Information</button>
+	<div id='footer'>
+		<div><img src="https://uky-gis.github.io/graphics/logo-color-400px.png" class="footer-img">
+			<h1>Average Rent in US Counties</h1>
+			Data obtained through the American Fact Finder (<a
+				href="http://factfinder.census.gov/">factfinder.census.gov</a>);
+			2010 Census, SF1. Map created by <a href="https://github.com/Marcus3663">Marcus3663</a>, Spring 2022.
+		</div>
+	</div>
+	
+	<footer>
+
+		<p>Map authored by Marcus Rodriguez</p>
+
+	</footer>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+		integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+		integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+		crossorigin=""></script>
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+	<script src="https://unpkg.com/simple-statistics@7.6.0/dist/simple-statistics.min.js"></script>
+
+	<script>
+		// map options
+		var options = {
+			center: [38, -95],
+			zoom: 4
+		}
+
+		// create a Leaflet map in our division container with id of 'map'
+		var map = L.map('map', options);
+
+		// Leaflet providers base map URL
+		var basemap_source =
+			'https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/dark_all/{z}/{x}/{y}.png'
+
+		// Leaflet providers attributes
+		var basemap_options = {
+			attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+			subdomains: 'abcd',
+			maxZoom: 19
+		};
+
+		// request some basemap tiles and add to the map
+		var tiles = L.tileLayer(basemap_source, basemap_options).addTo(map);
+
+
+	</script>
+</body>
+
+</html>
