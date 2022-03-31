@@ -2,399 +2,327 @@
 <html>
 
 <head>
-	<meta charset=utf-8 />
-	<title>US Average Rent</title>
-	<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <meta charset=utf-8 />
+    <title>Deaths by Drunk Drivers</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
 
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-		integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
-		crossorigin="" />
-	<link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
-	<style>
-		/* 
-			UKy Colors: 
-            #c7c9c8 light gray 
-            #63666a dark gray
-            #15397f dark blue
-            #009bda light blue
-            #0033a0 official blue
-        */
-		body {
-			margin: 0;
-			padding: 0;
-			background: #222;
-			/* dark */
-			font-family: Lato, sans-serif;
-			font-size: 100%;
-			color: #ddd;
-			/* light */
-		}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+        crossorigin="" />
+    <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
 
-		header {
-			width: 80%;
-			margin: 10px auto 10px auto;
-		}
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #222;
+            font-family: Lato, sans-serif;
+            color: #ddd;
+        }
 
-		h1 {
-			display: inline-block;
-			margin-right: 20px;
-			color: #0ee72b;
-		}
+        header {
+            width: 80%;
+            margin: 10px auto 10px auto;
+            color: white;
+        }
 
-		h2 {
-			display: inline-block;
-			color: #001323;
-		}
+        h1 {
+            color: white;
+        }
 
-		a {
-			color: #004A8B;
-		}
-
-		a:hover {
-			color: rgb(67, 69, 71);
-			text-decoration: none;
-		}
+        h2 {
+            margin: 2px 0;
+        }
 
 
-		#map {
-			position: absolute;
-			top: 0;
-			bottom: 0;
-			width: 100%;
-			background: rgba(63, 63, 63, 0.9);
-			/* with transparency */
-			border: 2px solid #dddedf;
-		}
+        #map {
+            width: 80%;
+            height: 540px;
+            margin: 10px 10%;
+            background: rgba(63, 63, 63, 0.9);
+            border-radius: 10px;
+        }
 
-		.legend {
-			padding: 6px 8px;
-			font-size: 1em;
-			/* Use transparency to blend elements. */
-			border: 2px solid rgba(244, 244, 244, 0.2);
-			background: rgba(100, 100, 100, 0.9);
-			color: rgba(244, 244, 244, 0.8);
-			border-radius: 5px;
-		}
+        footer {
+            padding: 6px 10%;
+            width: 80%;
+        }
 
-		.legend h3 {
-			font-size: 1.1em;
-			font-weight: bolder;
-			color: #ddd;
-			/* Light */
-			margin: 0 0 10px 0;
-		}
+        p {
+            font-size: 1em;
+            color: white;
+        }
 
-		.legend span {
-			width: 20px;
-			height: 20px;
-			float: left;
-			margin: 0 10px 4px 0;
-		}
+        .tooltip {
+            font-family: Lato, sans-serif;
+            padding: 6px 8px;
+            font-size: 1em;
+            /* Use transparency to blend elements. */
+            border: 1px solid rgba(244, 244, 244, 1);
+            background: rgba(100, 100, 100, 1);
+            color: rgba(244, 244, 244, 1);
+            border-radius: 5px;
+        }
 
-		.legend label {
-			font-size: 1.1em;
-		}
+        .legend {
+            font-family: Lato, sans-serif;
+            padding: 6px 8px;
+            font-size: 1em;
+            /* Use transparency to blend elements. */
+            border: 2px solid rgba(244, 244, 244, 0.2);
+            background: rgba(100, 100, 100, 0.9);
+            color: rgba(244, 244, 244, 0.8);
+            border-radius: 5px;
+        }
 
-		.legend label:after {
-			content: '';
-			display: block;
-			clear: both;
-		}
+        .legend h3 {
+            font-size: 1.1em;
+            font-weight: normal;
+            color: rgb(253, 253, 253);
+            margin: 0;
+        }
 
-		.leaflet-bar a {
-			/* Override the default style for Leaflet's zoom  */
-			background: rgba(100, 100, 100, 0.9);
-			color: rgba(244, 244, 244, 0.8);
-		}
+        .legend span {
+            width: 20px;
+            height: 20px;
+            float: left;
+            margin: 0 10px 4px 0;
+        }
 
-		footer {
-			padding: 6px 10%;
-			width: 80%;
-		}
+        .legend label {
+            font-size: 1.1em;
+        }
 
-		p {
-			font-size: 1em;
-			color: #001323;
-		}
+        .legend label:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
 
-		#info-button {
-			padding: 8px 5px;
-			font-size: 0.9em;
-			font-weight: bolder;
-			/* Style matches Leaflet controls */
-			border: 2px solid rgba(244, 244, 244, 0.2);
-			background: rgba(100, 100, 100, 0.9);
-			color: rgba(244, 244, 244, 0.8);
-			border-radius: 5px;
-			/* Position is fixed next to the zoom bar */
-			position: fixed;
-			top: 11px;
-			right: 52px;
-			/* Draw it on top of all elements */
-			z-index: 9999;
-			/* Cursor change on hover -- doesn't work on touch screensn */
-			cursor: pointer;
-		}
-
-		#footer {
-			width: 100%;
-			background: rgba(244, 244, 244, 0.8);
-			color: rgba(20, 20, 20, 0.8);
-			box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-			height: 0px;
-			padding: 0px;
-			/* display below the button to allow clicking if overlay covers screen */
-			z-index: 9000;
-			position: absolute;
-			/* 
-    Hide the footer be default. This should not contain too much information. Like to a new page for extended content.
-    */
-			bottom: -10px;
-			/* If too much is included, enable scroll */
-			overflow: scroll;
-		}
-
-		#footer div {
-			padding: 10px;
-		}
-
-		#footer h1 {
-			font-size: 1.3em;
-			margin: 0 0 5px 0;
-		}
-
-		.footer-img {
-			float: right;
-			height: 10vh;
-			margin: 10px;
-		}
-	</style>
+        .leaflet-bar a {
+            /* Override the default style for Leaflet's zoom  */
+            background: rgba(100, 100, 100, 0.9);
+            color: rgba(244, 244, 244, 0.8);
+        }
+    </style>
 </head>
 
 <body>
+    <header>
+        <h1>Deaths by Drunk Drivers in 2019</h1>
+    </header>
 
-	<header>
-		<h1>People Killed by Dunk Driving</h1>
-	</header>
+    <div id='map'></div>
 
-	<div id='map'></div>
-	<button id="info-button" onclick="myInfo()">Information</button>
-	<div id='footer'>
-		<div><img src="https://uky-gis.github.io/graphics/logo-color-400px.png" class="footer-img">
-			<h1>Average Rent in US deaths</h1>
-			Data obtained through the American Fact Finder (<a
-				href="http://factfinder.census.gov/">factfinder.census.gov</a>);
-			2010 Census, SF1. Map created by <a href="https://github.com/Marcus3663">Marcus3663</a>, Spring 2022.
-		</div>
-	</div>
+    <footer>
+        <p>Every year, people die from car accidents as a result of drunk driving. The map data was obtained through 
+			the Fatality Analysis Reporting System (<a href="https://www-fars.nhtsa.dot.gov/States/StatesAlcohol.aspx">FARS</a>).  
+        </p>
+    </footer>
 
-	<footer>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+    <script src='https://unpkg.com/simple-statistics@7.2.0/dist/simple-statistics.min.js'>
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.7.2/proj4.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.min.js"></script>
 
-		<p>Map authored by Marcus Rodriguez</p>
 
-	</footer>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.7.2/proj4.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.min.js"></script>
-	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
-		integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
-		crossorigin=""></script>
-	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-	<script src="https://unpkg.com/simple-statistics@7.6.0/dist/simple-statistics.min.js"></script>
+    <script>
 
-	<script>
-		// Build new CRS with Proj4Leaflet https://github.com/kartena/Proj4Leaflet https://epsg.io
-		var crs = new L.Proj.CRS('EPSG:102008',
-			`+proj=aea +lat_1=20 +lat_2=60 
+        // Build new CRS with Proj4Leaflet https://github.com/kartena/Proj4Leaflet https://epsg.io
+        var crs = new L.Proj.CRS('EPSG:102008',
+            `+proj=aea +lat_1=20 +lat_2=60 
              +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 
              +datum=NAD83 +units=m +no_defs`, {
-			// Set minimum zoom level (array item 0) and zoom steps as you zoom in
-			resolutions: [16385, 8192, 6000, 4096, 2048, 1024, 512, 256, 128],
-			origin: [0, 0]
-		})
+            // Set minimum zoom level (array item 0) and zoom steps as you zoom in
+            resolutions: [16385, 8192, 6000, 4096, 2048, 1024, 512, 256, 128],
+            origin: [0, 0]
+        })
 
-		const options = {
-			// Set the CRS to use
-			crs: crs,
-			center: [38, -98],
-			zoom: 2,
-			zoomSnap: 1,
-			zoomControl: false,
-		}
+        const options = {
+            // Set the CRS to use
+            crs: crs,
+            center: [38, -98],
+            zoom: 2,
+            zoomSnap: 1,
+            zoomControl: false,
+        }
 
-		const map = L.map('map', options);
+        const map = L.map('map', options);
 
-		map.addControl(L.control.zoom({
-			position: 'topright'
-		}));
+        map.addControl(L.control.zoom({
+            position: 'topright'
+        }));
 
-		// Set data location and properties
-		const geojsons = {
-			deaths: {
-				data: '../data/drunk_deaths.geojson',
-				props: {
-					color: '#444',
-					mouseover: 'orange',
-					weight: 0.7,
-					fillOpacity: 1,
-					attr: 'Total_Killed',
-					name: 'State',
-					popup: function (name, attr) {
-						return `<h2>${name}</h2>
-                                Drivers Killed: $${attr}`
-					}
-				}
-			},
-			states: {
-				data: '../data/us_states_20m.geojson',
-				props: {
-					color: 'blue',
-					weight: 2,
-					fillOpacity: 2,
-					interactive: false
-				}
-			},
-		}
-console.log(deaths),
-		function getColor(value, breaks) {
-			const colors = ['#f0f7ff', '#bdc5e3', '#8b96c7', '#5669ab', '#00408f']
-			if (value <= breaks[0][1]) {
-				return colors[0];
-			} else if (value <= breaks[1][1]) {
-				return colors[1];
-			} else if (value <= breaks[2][1]) {
-				return colors[2];
-			} else if (value <= breaks[3][1]) {
-				return colors[3];
-			} else if (value <= breaks[4][1]) {
-				return colors[4];
-			}
-		};
+        // Set data location and properties
+        const geojsons = {
+            counties: {
+                data: '../data/drunk_deaths.geojson',
+                props: {
+                    color: '#444',
+                    mouseover: 'orange',
+                    weight: 0.7,
+                    fillOpacity: 1,
+                    attr: 'Killed',
+                    name: 'NAME',
+                    popup: function (name, attr) {
+                        return `<h2>${name}</h2>
+                                People Killed: ${attr}`
+                    }
+                }
+            }, 
+            states: {
+                data: 'https://newmapsplus.github.io/assets/data/us_states_20m.geojson',
+                props: {
+                    color: '#222222',
+                    weight: 2,
+                    fillOpacity: 0,
+                    interactive: false
+                }
+            }, 
+        }
 
-		// Fetch a data file
-		fetch(geojsons.deaths.data)
-			.then(function (response) {
-				// When and if the data is ready, return it as JSON object
-				return response.geojson()
-			})
-			.then(function (data) {
-				// Create shorthand for the county layer properties
-				const props = geojsons.deaths.props
-				// Create Leaflet GeoJSON layer with the data
-				const dataLayer = L.geoJson(data, {
-					style: function (feature) {
-						return {
-							color: props.color,
-							weight: props.weight,
-							fillOpacity: props.fillOpacity,
-						};
-					},
-					filter: function (feature) {
-						if (feature.properties[props.attr] !== null) {
-							return feature;
-						}
-					},
-					onEachFeature: function (feature, layer) {
-						var popup = props.popup(feature.properties[props.name],
-							feature.properties[props.attr]);
-						layer.bindTooltip(popup, {
-							className: 'tooltip'
-						});
-						layer.on('mouseover', function (e) {
-							layer.setStyle({
-								weight: props.weight + 2,
-								color: props.mouseover,
-							});
-							layer.bringToFront();
-						});
-						layer.on('mouseout', function (e) {
-							layer.setStyle({
-								weight: props.weight,
-								color: props.color,
-							});
-							layer.bringToBack();
-						});
-					},
-				}).addTo(map);
+        function getColor(value, breaks) {
+            const colors = ['#f0f7ff', '#bdc5e3', '#8b96c7', '#5669ab', '#00408f']
+            if (value <= breaks[0][1]) {
+                return colors[0];
+            } else if (value <= breaks[1][1]) {
+                return colors[1];
+            } else if (value <= breaks[2][1]) {
+                return colors[2];
+            } else if (value <= breaks[3][1]) {
+                return colors[3];
+            } else if (value <= breaks[4][1]) {
+                return colors[4];
+            }
+        };
 
-				drawMap(dataLayer);
+        // Fetch a data file
+        fetch(geojsons.counties.data)
+            .then(function (response) {
+                // When and if the data is ready, return it as JSON object
+                return response.json()
+            })
+            .then(function (data) {
+                // Create shorthand for the county layer properties
+                const props = geojsons.counties.props
+                // Create Leaflet GeoJSON layer with the data
+                const dataLayer = L.geoJson(data, {
+                    style: function (feature) {
+                        return {
+                            color: props.color,
+                            weight: props.weight,
+                            fillOpacity: props.fillOpacity,
+                        };
+                    },
+                    filter: function (feature) {
+                        if (feature.properties[props.attr] !== null) {
+                            return feature;
+                        }
+                    },
+                    onEachFeature: function (feature, layer) {
+                        var popup = props.popup(feature.properties[props.name],
+                            feature.properties[props.attr]);
+                        layer.bindTooltip(popup, {
+                            className: 'tooltip'
+                        });
+                        layer.on('mouseover', function (e) {
+                            layer.setStyle({
+                                weight: props.weight + 2,
+                                color: props.mouseover,
+                            });
+                            layer.bringToFront();
+                        });
+                        layer.on('mouseout', function (e) {
+                            layer.setStyle({
+                                weight: props.weight,
+                                color: props.color,
+                            });
+                            layer.bringToBack();
+                        });
+                    },
+                }).addTo(map);
 
-				// Return another fetch request for the state data
-				return fetch(geojsons.states.data)
-			})
-			// Continue with the promise chain
-			.then(function (response) {
-				return response.geojson()
-			})
-			.then(function (data) {
-				const props = geojsons.states.props
-				const dataLayer = L.geoJson(data, {
-					style: function (feature) {
-						return {
-							color: props.color,
-							weight: props.weight,
-							fillOpacity: props.fillOpacity,
-							interactive: props.interactive
-						};
-					},
-				}).addTo(map);
-			})
-			// Catch any errors fetching the data
-			.catch(function (err) {
-				console.warn('Something went wrong.', err);
-			});
+                drawMap(dataLayer);
 
-		function drawMap(dataLayer) {
-			const attr = geojsons.deaths.props.attr;
-			const breaks = getClassBreaks(dataLayer);
-			dataLayer.eachLayer(function (layer) {
-				const props = layer.feature.properties;
-				if (props[attr] != null) {
-					layer.setStyle({
-						fillColor: getColor(props[attr], breaks)
-					})
-				}
-			});
-			drawLegend(breaks);
-		};
+                // Return another fetch request for the state data
+                return fetch(geojsons.states.data)
+            })
+            // Continue with the promise chain
+            .then(function (response) {
+                return response.json()
+            })
+            .then(function (data) {
+                const props = geojsons.states.props
+                const dataLayer = L.geoJson(data, {
+                    style: function (feature) {
+                        return {
+                            color: props.color,
+                            weight: props.weight,
+                            fillOpacity: props.fillOpacity,
+                            interactive: props.interactive
+                        };
+                    },
+                }).addTo(map);
+            })
+            // Catch any errors fetching the data
+            .catch(function (err) {
+                console.warn('Something went wrong.', err);
+            });
 
-		function getClassBreaks(dataLayer) {
-			const attr = geojsons.deaths.props.attr;
-			const values = [];
-			dataLayer.eachLayer(function (layer) {
-				const props = layer.feature.properties
-				if (props[attr] != null) {
-					let value = Number(props[attr]);
-					values.push(value);
-				}
-			});
-			const clusters = ss.ckmeans(values, 5);
-			const breaks = clusters.map(function (cluster) {
-				return [cluster[0], cluster.pop()];
-			});
-			return breaks;
-		};
+        function drawMap(dataLayer) {
+            const attr = geojsons.counties.props.attr;
+            const breaks = getClassBreaks(dataLayer);
+            dataLayer.eachLayer(function (layer) {
+                const props = layer.feature.properties;
+                if (props[attr] != null) {
+                    layer.setStyle({
+                        fillColor: getColor(props[attr], breaks)
+                    })
+                }
+            });
+            drawLegend(breaks);
+        };
 
-		function drawLegend(breaks) {
+        function getClassBreaks(dataLayer) {
+            const attr = geojsons.counties.props.attr;
+            const values = [];
+            dataLayer.eachLayer(function (layer) {
+                const props = layer.feature.properties
+                if (props[attr] != null) {
+                    let value = Number(props[attr]);
+                    values.push(value);
+                }
+            });
+            const clusters = ss.ckmeans(values, 5);
+            const breaks = clusters.map(function (cluster) {
+                return [cluster[0], cluster.pop()];
+            });
+            return breaks;
+        };
 
-			const legend = L.control({
-				position: 'bottomleft'
-			});
+        function drawLegend(breaks) {
 
-			legend.onAdd = function () {
-				const div = L.DomUtil.create('div', 'legend');
-				div.innerHTML = "<h3>People Killed<br></h3><br>";
-				for (let i = 0; i < breaks.length; i++) {
-					let color = getColor(breaks[i][0], breaks);
-					div.innerHTML +=
-						`<span style="background: ${color}"></span>
-                        <label>$${(breaks[i][0]).toLocaleString()}&mdash;
-                        $${(breaks[i][1]).toLocaleString()}</label>`
-				}
-				return div;
-			};
-			legend.addTo(map);
-		};
-	</script>
+            const legend = L.control({
+                position: 'bottomleft'
+            });
+
+            legend.onAdd = function () {
+                const div = L.DomUtil.create('div', 'legend');
+                div.innerHTML = "<h3>Fatalities<br></h3><br>";
+                for (let i = 0; i < breaks.length; i++) {
+                    let color = getColor(breaks[i][0], breaks);
+                    div.innerHTML +=
+                        `<span style="background: ${color}"></span>
+                        <label>${(breaks[i][0]).toLocaleString()}&mdash;
+                        ${(breaks[i][1]).toLocaleString()}</label>`
+                }
+                return div;
+            };
+            legend.addTo(map);
+        };
+    </script>
 </body>
-
 </html>
