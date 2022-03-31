@@ -230,7 +230,7 @@
 		// Set data location and properties
 		const geojsons = {
 			deaths: {
-				data: '/data/drunk_deaths.geojson',
+				data: '../data/drunk_deaths.geojson',
 				props: {
 					color: '#444',
 					mouseover: 'orange',
@@ -245,16 +245,16 @@
 				}
 			},
 			states: {
-				data: '/data/us_states_20m.geojson',
+				data: '../data/us_states_20m.geojson',
 				props: {
-					color: '#222222',
+					color: 'blue',
 					weight: 2,
-					fillOpacity: 0,
+					fillOpacity: 2,
 					interactive: false
 				}
 			},
 		}
-
+console.log(deaths),
 		function getColor(value, breaks) {
 			const colors = ['#f0f7ff', '#bdc5e3', '#8b96c7', '#5669ab', '#00408f']
 			if (value <= breaks[0][1]) {
@@ -274,7 +274,7 @@
 		fetch(geojsons.deaths.data)
 			.then(function (response) {
 				// When and if the data is ready, return it as JSON object
-				return response.json()
+				return response.geojson()
 			})
 			.then(function (data) {
 				// Create shorthand for the county layer properties
@@ -323,7 +323,7 @@
 			})
 			// Continue with the promise chain
 			.then(function (response) {
-				return response.json()
+				return response.geojson()
 			})
 			.then(function (data) {
 				const props = geojsons.states.props
