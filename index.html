@@ -230,7 +230,8 @@
 		// Set data location and properties
 		const geojsons = {
 			counties: {
-				data: '../data/drunk_deaths.geojson',
+				// use relative path to access data
+				data: 'data/drunk_deaths.geojson',
 				props: {
 					color: '#444',
 					mouseover: 'orange',
