@@ -132,7 +132,7 @@
 
 		#footer {
 			width: 100%;
-			background: rgba(178, 63, 63, 0.8);
+			background: rgba(255, 196, 196, 0.926);
 			color: rgba(6, 0, 0, 0.8);
 			box-shadow: 0 0 15px rgba(236, 11, 11, 0.2);
 			height: 0px;
@@ -170,26 +170,28 @@
 		<h1>Deaths by Drunk Drivers in 2019</h1>
 	</header>
 
-	<div id='map'></div>
-	<button id="info-button" onclick="myInfo()">Information</button>
-	<div id='footer'>
-		<div><img src="https://uky-gis.github.io/graphics/logo-color-400px.png" class="footer-img">
-			<h1>About</h1>
-			<ul>
-				<li>Map created by <a href="https://github.com/Marcus3663">Marcus3663</a>, Spring 2022. </li>
-				<li>Data was obtained through the Fatality Analysis Reporting System (<a
-						href="https://www-fars.nhtsa.dot.gov/States/StatesAlcohol.aspx">FARS</a>).</li>
-				<li>Geographic data was obtained through the <a
-						href="https://www.census.gov/geo/maps-data/data/cbf/cbf_counties.html">US Census Bureau </a>
-				</li>
-				<li>Softerware Used: QGIS 3.20.3</li>
-			</ul>
+	<div id='map'>
+		<div id='footer'>
+			<div><img src="https://uky-gis.github.io/graphics/logo-color-400px.png" class="footer-img">
+				<h1>About</h1>
+				<ul>
+					<li>Map created by <a href="https://github.com/Marcus3663">Marcus3663</a>, Spring 2022. </li>
+					<li>Data was obtained through the Fatality Analysis Reporting System (<a
+							href="https://www-fars.nhtsa.dot.gov/States/StatesAlcohol.aspx">FARS</a>).</li>
+					<li>Geographic data was obtained through the <a
+							href="https://www.census.gov/geo/maps-data/data/cbf/cbf_counties.html">US Census Bureau </a>
+					</li>
+					<li>Softerware Used: QGIS 3.20.3</li>
+				</ul>
+			</div>
 		</div>
+		<footer>
+			<p>Every year, people die from car accidents as a result of drunk driving.
+			</p>
+		</footer>
 	</div>
-	<footer>
-		<p>Every year, people die from car accidents as a result of drunk driving.
-		</p>
-	</footer>
+	<button id="info-button" onclick="myInfo()">Information</button>
+	
 
 	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 		integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
@@ -230,7 +232,8 @@
 		// Set data location and properties
 		const geojsons = {
 			counties: {
-				data: '../data/drunk_deaths.geojson',
+				// use relative path to access data
+				data: 'data/drunk_deaths.geojson',
 				props: {
 					color: '#444',
 					mouseover: 'orange',
@@ -255,6 +258,7 @@
 			},
 		}
 
+		// How about these colors? Do they match your theme?
 		function getColor(value, breaks) {
 			const colors = ['#f0f7ff', '#bdc5e3', '#8b96c7', '#5669ab', '#00408f']
 			if (value <= breaks[0][1]) {
